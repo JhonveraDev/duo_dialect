@@ -1,0 +1,1 @@
+.chats .row>div:last-child{min-width:0;display:flex;flex:1;flex-direction:column;justify-content:center;gap:5px}.chats .row b{display:block;line-height:1.15;letter-spacing:-.1px}.chats .row small{display:block!important;margin:0!important;line-height:1.25;color:#8c97aa}.chats .row{min-height:64px}.chats .row .avatar{flex:0 0 40px}
