@@ -11,7 +11,10 @@ class DeterministicAIProviderTests(unittest.TestCase):
         response = provider.generate_response("¿Dónde vivís?", "##INFO\n- dato", False)
 
         self.assertTrue(validate_response(response, "dato").valid)
-        self.assertEqual(response, provider.generate_response("otro", "dato", False))
+        self.assertEqual(
+            response,
+            provider.generate_response("¿Dónde vivís?", "dato", False),
+        )
 
 
 class FakeMessages:

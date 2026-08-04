@@ -18,7 +18,11 @@ class FakeIntegrationTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             knowledge_path = root / "knowledge.txt"
-            knowledge_path.write_text("##HOBBIES\n- Lectura", encoding="utf-8")
+            knowledge_path.write_text(
+                "Medellín, Ingeniería de Sistemas, tecnología educativa, Python, "
+                "fotografía, ciencia ficción, ajedrez y Nube.",
+                encoding="utf-8",
+            )
             responder = Responder(
                 DeterministicAIProvider(), knowledge_path, logging.getLogger("test-e2e")
             )
@@ -46,5 +50,8 @@ class FakeIntegrationTests(unittest.TestCase):
         self.assertTrue(
             all(validate_response(row.mensaje, "dato").valid for row in rows)
         )
+        self.assertGreater(len({row.mensaje for row in rows}), 10)
+        self.assertIn("Medellín", rows[3].mensaje)
+        self.assertIn("Ingeniería de Sistemas", rows[5].mensaje)
         self.assertFalse(simulator.run_once(sheet))
         self.assertEqual(runner.run_once(), CycleResult.FINISHED)

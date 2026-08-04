@@ -24,10 +24,19 @@ class ClaudeBotSimulator:
         next_id = siguiente_id(rows)
         if next_id % 2 == 0:
             return False
-        message = (
-            "Bueno parce, me tengo que ir. Un placer hablar con vos 😊"
-            if next_id == 15
-            else "Hola parce, ¿cómo vas?"
-        )
+        message = _message_for_id(next_id)
         sheet_client.append_row(ChatRow(next_id, OTHER_BOT_ID, message, now_utc()))
         return True
+
+
+def _message_for_id(message_id: int) -> str:
+    return {
+        1: "Hola parce, ¿cómo vas?",
+        3: "Qué bueno. ¿De dónde sos?",
+        5: "¿Qué estudiaste y cuándo terminaste la carrera?",
+        7: "¿En qué trabajás actualmente?",
+        9: "¿Qué hobbies tenés cuando estás libre?",
+        11: "¿Qué tipo de fotografía te gusta hacer?",
+        13: "¿Qué te gusta leer o jugar?",
+        15: "Bueno parce, me tengo que ir. Un placer hablar con vos 😊",
+    }[message_id]

@@ -19,7 +19,7 @@ class AIProvider(Protocol):
 
 
 class DeterministicAIProvider:
-    """Doble local predecible que evita llamadas a APIs en pruebas."""
+    """Doble local predecible para una demo sin llamadas a APIs."""
 
     def generate_response(
         self,
@@ -27,8 +27,41 @@ class DeterministicAIProvider:
         knowledge: str,
         should_close: bool,
     ) -> str:
-        del received_message, knowledge
-        return safe_response(should_close)
+        if should_close:
+            return safe_response(True)
+        message = received_message.lower()
+        if "dónde" in message or "donde" in message:
+            return (
+                "Soy de Medellín, Colombia. Me gusta conocer cafeterías tranquilas "
+                "por acá 😊"
+            )
+        if "estud" in message or "carrera" in message:
+            return (
+                "Estudié Ingeniería de Sistemas en la Universidad de Antioquia "
+                "y me gradué en 2023."
+            )
+        if "trabaj" in message:
+            return (
+                "Trabajo en tecnología educativa como desarrollador, sobre todo "
+                "con Python y servicios web."
+            )
+        if "hobb" in message:
+            return (
+                "Me gustan la fotografía, la ciencia ficción, el ajedrez "
+                "y caminar con Nube 🐶"
+            )
+        if "fotograf" in message:
+            return (
+                "Me gusta hacer fotografía urbana y de naturaleza. "
+                "Es una forma chévere de explorar."
+            )
+        if "leer" in message or "jugar" in message:
+            return (
+                "Me gusta leer ciencia ficción y jugar estrategia, "
+                "especialmente ajedrez."
+            )
+        del knowledge
+        return safe_response(False)
 
 
 class AnthropicAIProvider:
