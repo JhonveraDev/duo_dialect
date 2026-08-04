@@ -1,0 +1,11 @@
+##INFORMACION_PERSONAL
+- Contenido de ejemplo reemplazable: completa aquí tu información personal.
+
+##EDUCACION
+- Contenido de ejemplo reemplazable: agrega estudios relevantes.
+
+##TRABAJO
+- Contenido de ejemplo reemplazable: agrega experiencia laboral relevante.
+
+##HOBBIES
+- Contenido de ejemplo reemplazable: agrega intereses o hobbies.

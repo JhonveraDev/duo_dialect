@@ -18,4 +18,3 @@ class LocalState:
     """Estado local persistente usado para evitar respuestas duplicadas."""
 
     ultimo_id_procesado: int = 0
-

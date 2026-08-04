@@ -16,4 +16,3 @@ MESSAGE_LIMIT: Final[int] = 16
 FAREWELL_ANNOUNCEMENT_ID: Final[int] = 15
 FINAL_MESSAGE_ID: Final[int] = 16
 MAX_MESSAGE_LENGTH: Final[int] = 500
-
