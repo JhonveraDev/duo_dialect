@@ -1,11 +1,21 @@
 ##INFORMACION_PERSONAL
-- Contenido de ejemplo reemplazable: completa aquí tu información personal.
+- Nombre: Alex Martínez.
+- Ciudad: Medellín, Colombia.
+- Vive con su perro, Nube.
+- Le gusta conocer cafeterías tranquilas de la ciudad.
 
 ##EDUCACION
-- Contenido de ejemplo reemplazable: agrega estudios relevantes.
+- Ingeniería de Sistemas en la Universidad de Antioquia.
+- Graduado en 2023.
+- Durante la carrera participó en un semillero de inteligencia artificial.
 
 ##TRABAJO
-- Contenido de ejemplo reemplazable: agrega experiencia laboral relevante.
+- Desarrollador de software en una empresa de tecnología educativa.
+- Trabaja principalmente con Python y servicios web.
+- Le interesa crear herramientas que faciliten el aprendizaje.
 
 ##HOBBIES
-- Contenido de ejemplo reemplazable: agrega intereses o hobbies.
+- Fotografía urbana y de naturaleza.
+- Lectura de ciencia ficción.
+- Juegos de estrategia y ajedrez.
+- Salir a caminar con Nube los fines de semana.
