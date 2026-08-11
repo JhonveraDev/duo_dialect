@@ -1,8 +1,11 @@
 """Abstracciones de generación de respuestas."""
 
+import json
+from collections.abc import Sequence
 from typing import Any, Protocol
 
 from codex_bot.config import ConfigError, Settings
+from codex_bot.models import ChatRow, MemoryProposal, MemoryRecord
 from codex_bot.validator import safe_response
 
 AI_REQUEST_TIMEOUT_SECONDS = 30.0
@@ -124,6 +127,25 @@ class AnthropicAIProvider:
             if getattr(content_block, "type", None) == "text" and isinstance(text, str):
                 return text.strip()
         raise RuntimeError("El proveedor no devolvió contenido textual.")
+    def extract_memories(
+        self, rows: Sequence[ChatRow], knowledge: str, existing: Sequence[MemoryRecord]
+    ) -> list[MemoryProposal]:
+        transcript = "\n".join(f"{row.id} | {row.bot} | {row.mensaje}" for row in rows)
+        response = self._client.messages.create(
+            model=self._model, max_tokens=1000, output_config={"effort": "low"},
+            system=("Extrae solo hechos verificables sobre claude_bot expresados por claude_bot. "
+                "No extraigas datos de codex_bot. No repitas la base ni recuerdos existentes. "
+                "Devuelve JSON: {\"amigo\":[{\"msg\":numero,\"texto\":\"tercera persona\","
+                "\"tipo\":\"hecho|preferencia|relacion|evento|plan\",\"reemplaza_a\":\"id opcional\"}]}"),
+            messages=[{"role": "user", "content": f"BASE:\n{knowledge}\n\nHISTORIAL:\n{transcript}\n\nEXISTENTES:\n{existing}"}],
+        )
+        text = next((getattr(block, "text", "") for block in response.content if getattr(block, "type", None) == "text"), "")
+        try:
+            payload = json.loads(text)
+        except (TypeError, json.JSONDecodeError):
+            return []
+        proposals = payload.get("amigo", []) if isinstance(payload, dict) else []
+        return [MemoryProposal(msg=item["msg"], texto=item["texto"], tipo=item.get("tipo", "hecho"), reemplaza_a=item.get("reemplaza_a", "")) for item in proposals if isinstance(item, dict) and isinstance(item.get("msg"), int) and isinstance(item.get("texto"), str)]
 
 
 def create_ai_provider(settings: Settings) -> AIProvider:

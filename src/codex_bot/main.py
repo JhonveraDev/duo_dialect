@@ -17,6 +17,7 @@ from codex_bot.conversation import (
     validar_historial,
 )
 from codex_bot.logging_config import configure_logging
+from codex_bot.memory import GoogleSheetsMemoryClient, MemoryManager
 from codex_bot.models import ChatRow, LocalState
 from codex_bot.responder import Responder
 from codex_bot.sheet_client import (
@@ -61,7 +62,8 @@ class ConversationRunner:
         self.logger.debug("Historial leído: %d filas.", len(rows))
 
         if conversacion_terminada(rows):
-            self.logger.info("Conversación terminada con 16 filas.")
+            remembered = self.responder.remember_conversation(rows)
+            self.logger.info("Conversación terminada con 16 filas; recuerdos nuevos: %d.", remembered)
             return CycleResult.FINISHED
 
         state = self.state
@@ -117,7 +119,12 @@ def run(settings: Settings) -> int:
             "Reintento Google Sheets %d en %.0f s.", attempt, delay
         ),
     )
-    responder = Responder(create_ai_provider(settings), settings.knowledge_file, logger)
+    provider = create_ai_provider(settings)
+    memory_manager = (
+        MemoryManager(GoogleSheetsMemoryClient.from_service_account(str(settings.google_credentials_path), settings.memory_sheet_id), provider)
+        if settings.memory_sheet_id else None
+    )
+    responder = Responder(provider, settings.knowledge_file, logger, memory_manager=memory_manager)
     runner = ConversationRunner(
         client, responder, settings.state_file, settings.bot_id, logger
     )

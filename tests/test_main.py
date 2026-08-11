@@ -32,6 +32,9 @@ class RecordingResponder:
     def __init__(self) -> None:
         self.calls: list[tuple[str, bool]] = []
 
+    def remember_conversation(self, rows: list[ChatRow]) -> int:
+        del rows
+        return 0
     def generate(self, received_message: str, should_close: bool) -> str:
         self.calls.append((received_message, should_close))
         return "Todo bien, parce."

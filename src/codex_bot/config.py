@@ -30,6 +30,7 @@ class Settings:
     log_level: str
     state_file: Path
     knowledge_file: Path
+    memory_sheet_id: str
 
     @classmethod
     def from_environment(
@@ -64,6 +65,7 @@ class Settings:
             knowledge_file=Path(
                 values.get("KNOWLEDGE_FILE", "./data/mi_informacion.txt")
             ),
+            memory_sheet_id=values.get("MEMORY_SHEET_ID", "").strip(),
         )
         settings.validate(require_credentials=require_credentials)
         return settings
