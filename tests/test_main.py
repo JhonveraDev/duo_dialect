@@ -4,7 +4,7 @@ import unittest
 from pathlib import Path
 
 from codex_bot.main import ConversationRunner, CycleResult, run_polling
-from codex_bot.models import ChatRow
+from codex_bot.models import ChatRow, LocalState
 from codex_bot.sheet_client import TransientGoogleSheetsError
 
 
@@ -48,6 +48,25 @@ class ConversationRunnerTests(unittest.TestCase):
         self.assertEqual(result, CycleResult.WAITING)
         self.assertEqual(sheet.appended_rows, [])
         self.assertEqual(responder.calls, [])
+
+    def test_reinicia_estado_si_la_hoja_fue_vaciada(self) -> None:
+        sheet = InMemorySheet([])
+        responder = RecordingResponder()
+        with tempfile.TemporaryDirectory() as directory:
+            runner = ConversationRunner(
+                sheet,
+                responder,  # type: ignore[arg-type]
+                Path(directory) / "state.json",
+                "codex_bot",
+                logging.getLogger("test-main"),
+                state=LocalState(ultimo_id_procesado=15),
+            )
+
+            result = runner.run_once()
+
+        self.assertEqual(result, CycleResult.WAITING)
+        self.assertEqual(runner.state, LocalState(ultimo_id_procesado=0))
+        self.assertEqual(sheet.appended_rows, [])
 
     def test_agrega_respuesta_y_persiste_id_recibido(self) -> None:
         result, sheet, responder = self.run_with([row(1, "claude_bot")])

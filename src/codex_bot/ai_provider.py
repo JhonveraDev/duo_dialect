@@ -5,6 +5,8 @@ from typing import Any, Protocol
 from codex_bot.config import ConfigError, Settings
 from codex_bot.validator import safe_response
 
+AI_REQUEST_TIMEOUT_SECONDS = 30.0
+
 
 class AIProvider(Protocol):
     """Contrato que separa la generación de la lógica de conversación."""
@@ -76,7 +78,11 @@ class AnthropicAIProvider:
                 raise RuntimeError(
                     "Falta la dependencia anthropic; instala requirements.txt."
                 ) from error
-            client = Anthropic(api_key=api_key, max_retries=2)
+            client = Anthropic(
+                api_key=api_key,
+                max_retries=2,
+                timeout=AI_REQUEST_TIMEOUT_SECONDS,
+            )
         self._client = client
 
     def generate_response(

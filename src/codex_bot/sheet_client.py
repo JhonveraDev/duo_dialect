@@ -123,7 +123,7 @@ class GoogleSheetsClient:
                 "La cabecera debe ser exactamente: id | bot | mensaje | timestamp."
             )
         return [
-            _row_from_values(row, position)
+            _row_from_values(_complete_row_values(row, position), position)
             for position, row in enumerate(values[1:], 2)
         ]
 
@@ -146,11 +146,15 @@ class GoogleSheetsClient:
         )
 
 
-def _row_from_values(values: Sequence[object], position: int) -> ChatRow:
-    if len(values) != 4:
+def _complete_row_values(values: Sequence[object], position: int) -> tuple[object, ...]:
+    """Completa celdas finales omitidas por values.get sin ocultar errores."""
+    if len(values) > len(SHEET_HEADER):
         raise SheetContractError(
-            f"La fila {position} debe tener exactamente cuatro columnas."
+            f"La fila {position} tiene más de cuatro columnas."
         )
+    return tuple(values) + ("",) * (len(SHEET_HEADER) - len(values))
+
+def _row_from_values(values: Sequence[object], position: int) -> ChatRow:
     try:
         row_id = int(str(values[0]))
     except (TypeError, ValueError) as error:

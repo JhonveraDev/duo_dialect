@@ -74,6 +74,20 @@ class SheetClientTests(unittest.TestCase):
         with self.assertRaises(SheetContractError):
             client.read_rows()
 
+    def test_completa_celdas_finales_omitidas_por_google(self) -> None:
+        service = FakeService(
+            {
+                "values": [
+                    ["id", "bot", "mensaje", "timestamp"],
+                    ["1", "claude_bot", "Hola"],
+                ]
+            }
+        )
+
+        row = GoogleSheetsClient(service, "sheet-id").read_rows()[0]
+
+        self.assertEqual(row.timestamp, "")
+
     def test_append_usa_los_parametros_contractuales(self) -> None:
         service = FakeService({"values": [["id", "bot", "mensaje", "timestamp"]]})
         client = GoogleSheetsClient(service, "sheet-id")

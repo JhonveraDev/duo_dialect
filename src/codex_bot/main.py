@@ -63,13 +63,20 @@ class ConversationRunner:
         if conversacion_terminada(rows):
             self.logger.info("Conversación terminada con 16 filas.")
             return CycleResult.FINISHED
+
+        state = self.state
+        if state is None:
+            raise RuntimeError("El estado local no se inicializó.")
+        if not rows:
+            if state.ultimo_id_procesado:
+                self.state = LocalState(ultimo_id_procesado=0)
+                save_state(self.state_path, self.state)
+                self.logger.info("Estado local reiniciado: el historial está vacío.")
+            return CycleResult.WAITING
         if not es_mi_turno(rows, self.bot_id):
             return CycleResult.WAITING
 
         received_row = rows[-1]
-        state = self.state
-        if state is None:
-            raise RuntimeError("El estado local no se inicializó.")
         if received_row.id <= state.ultimo_id_procesado:
             return CycleResult.WAITING
 
@@ -152,6 +159,7 @@ def run_polling(
 
 def main() -> int:
     """Carga `.env`, valida la configuración y ejecuta el proceso real."""
+    _configure_console_utf8()
     try:
         _load_dotenv_if_available()
         settings = Settings.from_environment(require_credentials=True)
@@ -171,6 +179,15 @@ def _load_dotenv_if_available() -> None:
         return
     load_dotenv()
 
+
+def _configure_console_utf8() -> None:
+    """Evita que un emoji en un log rompa el proceso en consolas Windows."""
+    import sys
+
+    for stream in (sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if callable(reconfigure):
+            reconfigure(encoding="utf-8", errors="replace")
 
 if __name__ == "__main__":
     raise SystemExit(main())

@@ -32,6 +32,8 @@ Completa `.env`, `credentials.json` y reemplaza el contenido de ejemplo de `data
 id | bot | mensaje | timestamp
 ```
 
+Configura toda la columna `timestamp` como **texto sin formato**. Google Sheets puede reinterpretar una fecha ISO-8601 en formato automático y romper el contrato.
+
 ## Variables y ejecución
 
 `BOT_ID=codex_bot` y `LIMITE_MENSAJES=16` son obligatorios. Para Anthropic usa `AI_PROVIDER=anthropic`, una `AI_API_KEY` válida y `AI_MODEL`. Luego ejecuta:
@@ -40,7 +42,7 @@ id | bot | mensaje | timestamp
 .\.venv\Scripts\python.exe -m codex_bot.main
 ```
 
-El bot no inicia un historial vacío. Ante 429/500/503 aplica reintentos y continúa en el siguiente ciclo; `Ctrl+C` termina limpiamente.
+El bot no inicia un historial vacío. Ante 429/500/503 aplica reintentos y continúa en el siguiente ciclo; `Ctrl+C` termina limpiamente. Si una conversación ya archivada deja `chat` vacía, el bot reinicia su estado local de forma segura para poder atender la próxima conversación.
 
 ## Contrato con claude_bot
 
@@ -49,6 +51,8 @@ El bot no inicia un historial vacío. Ante 429/500/503 aplica reintentos y conti
 - Timestamp UTC `YYYY-MM-DDTHH:MM:SSZ`; mensaje UTF-8 de máximo 500 caracteres.
 - `claude_bot` escribe la fila 1; `codex_bot` nunca inicia ni se responde a sí mismo.
 - La fila 15 anuncia despedida; `codex_bot` escribe y cierra la fila 16. Nunca existe fila 17.
+- Al llegar a 16 filas, `codex_bot` no archiva ni vacía `chat`. `claude_bot` debe archivar primero y avisar antes de limpiar la hoja.
+- No crear pestañas compartidas con prefijo `conv_` ni `archivo_`; la memoria privada de `claude_bot` reserva esos nombres.
 
 ## Pruebas y simulador
 
