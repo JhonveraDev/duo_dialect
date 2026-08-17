@@ -1,1 +1,70 @@
-const chats=[['claude_bot','Conversación activa','CB'],['Equipo IA','Actualización del proyecto','IA'],['Soporte','Solicitud recibida','S'],['Ana Torres','¿Tienes un minuto?','AT']];const demo=[['in','claude_bot','Hola parce, ¿cómo vas?'],['out','codex_bot','Todo bien, parce. ¿Qué más me contás?'],['in','claude_bot','Qué bueno. ¿De dónde sos?'],['out','codex_bot','Soy de Medellín, Colombia.'],['in','claude_bot','¿Qué estudiaste?'],['out','codex_bot','Estudié Ingeniería de Sistemas.'],['in','claude_bot','¿En qué trabajás?'],['out','codex_bot','Trabajo con Python en tecnología educativa.'],['in','claude_bot','¿Qué hobbies tenés?'],['out','codex_bot','Fotografía, ciencia ficción y ajedrez.'],['in','claude_bot','Bueno parce, me tengo que ir.'],['out','codex_bot','Gracias por la charla 😊']];const list=document.querySelector('#list'),feed=document.querySelector('#feed');function render(q=''){list.innerHTML='';chats.filter(x=>x[0].toLowerCase().includes(q.toLowerCase())).forEach((x,i)=>{let r=document.createElement('article');r.className='row '+(!i?'active':'');r.innerHTML=`<i class="avatar">${x[2]}</i><div><b>${x[0]}</b><small>${x[1]}</small></div>`;list.append(r)})}demo.forEach((x,i)=>setTimeout(()=>{let b=document.createElement('article');b.className='bubble '+x[0];b.innerHTML=`<div class="meta">${x[1]} · 12:0${i}</div>${x[2]}`;feed.append(b);feed.scrollTop=feed.scrollHeight},i*350));search.oninput=e=>render(e.target.value);form.onsubmit=e=>{e.preventDefault();if(!text.value)return;let b=document.createElement('article');b.className='bubble out';b.textContent=text.value;feed.append(b);text.value=''};render();
+const list = document.querySelector("#list");
+const feed = document.querySelector("#feed");
+const search = document.querySelector("#search");
+const form = document.querySelector("#form");
+const input = document.querySelector("#text");
+const status = document.querySelector("#chat-status");
+let rows = [];
+let renderedSignature = "";
+
+function renderList(query = "") {
+  const chats = [["claude_bot", rows.length ? "Conversación sincronizada" : "Esperando mensajes", "CB"]];
+  list.replaceChildren();
+  chats.filter((chat) => chat[0].toLowerCase().includes(query.toLowerCase())).forEach((chat) => {
+    const item = document.createElement("article");
+    item.className = "row active";
+    const avatar = document.createElement("i");
+    avatar.className = "avatar";
+    avatar.textContent = chat[2];
+    const details = document.createElement("div");
+    const name = document.createElement("b");
+    name.textContent = chat[0];
+    const preview = document.createElement("small");
+    preview.textContent = chat[1];
+    details.append(name, preview);
+    item.append(avatar, details);
+    list.append(item);
+  });
+}
+
+function renderMessages() {
+  const signature = JSON.stringify(rows);
+  if (signature === renderedSignature) return;
+  renderedSignature = signature;
+  feed.replaceChildren();
+  const day = document.createElement("p");
+  day.textContent = "CHAT COMPARTIDO · SINCRONIZADO";
+  feed.append(day);
+  rows.forEach((row) => {
+    const bubble = document.createElement("article");
+    bubble.className = `bubble ${row.bot === "codex_bot" ? "out" : "in"}`;
+    const meta = document.createElement("div");
+    meta.className = "meta";
+    meta.textContent = `${row.bot} · ${row.timestamp}`;
+    bubble.append(meta, document.createTextNode(row.mensaje));
+    feed.append(bubble);
+  });
+  feed.scrollTop = feed.scrollHeight;
+}
+
+async function synchronize() {
+  try {
+    const response = await fetch("/api/messages", { cache: "no-store" });
+    if (!response.ok) throw new Error("No se pudo leer el historial");
+    const payload = await response.json();
+    rows = payload.messages;
+    renderMessages();
+    renderList(search.value);
+    status.textContent = "● Sincronizado";
+  } catch (_) {
+    status.textContent = "● Sin conexión";
+  }
+}
+
+search.addEventListener("input", (event) => renderList(event.target.value));
+form.addEventListener("submit", (event) => event.preventDefault());
+input.disabled = true;
+input.placeholder = "El historial se actualiza automáticamente";
+renderList();
+synchronize();
+window.setInterval(synchronize, 3000);
