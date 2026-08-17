@@ -68,6 +68,13 @@ class DeterministicAIProvider:
         del knowledge
         return safe_response(False)
 
+    def extract_memories(
+        self, rows: Sequence[ChatRow], knowledge: str, existing: Sequence[MemoryRecord]
+    ) -> list[MemoryProposal]:
+        """Permite pruebas sin API; el archivo se conserva sin inventar recuerdos."""
+        del rows, knowledge, existing
+        return []
+
 
 class AnthropicAIProvider:
     """Proveedor real Anthropic configurado sin acoplarlo al dominio."""

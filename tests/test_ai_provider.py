@@ -16,6 +16,10 @@ class DeterministicAIProviderTests(unittest.TestCase):
             provider.generate_response("¿Dónde vivís?", "dato", False),
         )
 
+    def test_no_inventa_recuerdos_en_modo_sin_api(self) -> None:
+        provider = DeterministicAIProvider()
+
+        self.assertEqual(provider.extract_memories([], "dato", []), [])
 
 class FakeMessages:
     def __init__(self) -> None:
