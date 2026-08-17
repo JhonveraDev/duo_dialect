@@ -9,6 +9,7 @@ from pathlib import Path
 
 from codex_bot.ai_provider import create_ai_provider
 from codex_bot.config import ConfigError, Settings
+from codex_bot.constants import MESSAGE_LIMIT
 from codex_bot.conversation import (
     conversacion_terminada,
     debo_cerrar,
@@ -64,7 +65,7 @@ class ConversationRunner:
 
         if conversacion_terminada(rows):
             remembered = self.responder.remember_conversation(rows)
-            self.logger.info("Conversación terminada con 16 filas; recuerdos nuevos: %d.", remembered)
+            self.logger.info("Conversación terminada con %d filas; recuerdos nuevos: %d.", MESSAGE_LIMIT, remembered)
             return CycleResult.FINISHED
 
         state = self.state

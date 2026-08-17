@@ -57,7 +57,7 @@ def conversation() -> list[ChatRow]:
             f"Mensaje {index}",
             "2026-08-17T20:00:00Z",
         )
-        for index in range(1, 17)
+        for index in range(1, 25)
     ]
 
 class MemoryTests(unittest.TestCase):
@@ -95,8 +95,8 @@ class MemoryTests(unittest.TestCase):
         stored = manager.remember(conversation(), "dato")
         context = manager.context()
 
-        self.assertEqual(stored, 8)
-        self.assertEqual(len(client.archived_rows), 16)
+        self.assertEqual(stored, 12)
+        self.assertEqual(len(client.archived_rows), 24)
         self.assertIn("INTERCAMBIOS ANTERIORES", context)
         self.assertIn("Pregunta previa: Mensaje 1", context)
         self.assertIn("Respuesta previa: Mensaje 2", context)

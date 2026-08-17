@@ -36,11 +36,11 @@ class ConfigTests(unittest.TestCase):
             with self.assertRaisesRegex(ConfigError, "BOT_ID"):
                 Settings.from_environment(environment)
 
-    def test_rechaza_limite_distinto_de_16(self) -> None:
+    def test_rechaza_limite_distinto_de_24(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             knowledge = Path(directory) / "knowledge.txt"
             knowledge.write_text("dato", encoding="utf-8")
-            environment = self.environment(knowledge) | {"LIMITE_MENSAJES": "15"}
+            environment = self.environment(knowledge) | {"LIMITE_MENSAJES": "23"}
 
             with self.assertRaisesRegex(ConfigError, "LIMITE_MENSAJES"):
                 Settings.from_environment(environment)
@@ -63,7 +63,7 @@ class ConfigTests(unittest.TestCase):
             "GOOGLE_CREDENTIALS_PATH": "missing-credentials.json",
             "BOT_ID": "codex_bot",
             "INTERVALO_LECTURA": "30",
-            "LIMITE_MENSAJES": "16",
+            "LIMITE_MENSAJES": "24",
             "AI_PROVIDER": "fake",
             "LOG_LEVEL": "INFO",
             "KNOWLEDGE_FILE": str(knowledge),

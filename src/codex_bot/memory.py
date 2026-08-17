@@ -6,6 +6,7 @@ import re
 from uuid import uuid4
 from typing import Any, Protocol
 
+from codex_bot.constants import MESSAGE_LIMIT
 from codex_bot.models import ChatRow, MemoryProposal, MemoryRecord
 from codex_bot.sheet_client import run_with_backoff
 
@@ -129,7 +130,7 @@ class MemoryManager:
         return memory_context(self._client.read_records())
 
     def remember(self, rows: Sequence[ChatRow], knowledge: str) -> int:
-        if len(rows) != 16:
+        if len(rows) != MESSAGE_LIMIT:
             return 0
         archive_name = self._client.archive_conversation(rows)
         existing = self._client.read_records()
@@ -236,9 +237,9 @@ class GoogleSheetsMemoryClient:
         return records
 
     def archive_conversation(self, rows: Sequence[ChatRow]) -> str:
-        """Copia las 16 filas a una pestaña privada sin tocar chat."""
-        if len(rows) != 16:
-            raise MemoryContractError("Solo se puede archivar una conversación de 16 filas.")
+        """Copia las filas de la conversación cerrada a una pestaña privada."""
+        if len(rows) != MESSAGE_LIMIT:
+            raise MemoryContractError(f"Solo se puede archivar una conversación de {MESSAGE_LIMIT} filas.")
         metadata = run_with_backoff(
             lambda: self._service.spreadsheets().get(
                 spreadsheetId=self._spreadsheet_id, fields="sheets.properties"

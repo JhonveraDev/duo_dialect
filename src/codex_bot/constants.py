@@ -12,7 +12,7 @@ SHEET_HEADER: Final[tuple[str, str, str, str]] = (
     "mensaje",
     "timestamp",
 )
-MESSAGE_LIMIT: Final[int] = 16
-FAREWELL_ANNOUNCEMENT_ID: Final[int] = 15
-FINAL_MESSAGE_ID: Final[int] = 16
+MESSAGE_LIMIT: Final[int] = 24
+FAREWELL_ANNOUNCEMENT_ID: Final[int] = 23
+FINAL_MESSAGE_ID: Final[int] = 24
 MAX_MESSAGE_LENGTH: Final[int] = 500

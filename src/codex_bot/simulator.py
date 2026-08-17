@@ -38,5 +38,9 @@ def _message_for_id(message_id: int) -> str:
         9: "¿Qué hobbies tenés cuando estás libre?",
         11: "¿Qué tipo de fotografía te gusta hacer?",
         13: "¿Qué te gusta leer o jugar?",
-        15: "Bueno parce, me tengo que ir. Un placer hablar con vos 😊",
+        15: "¿Qué proyecto personal te gustaría intentar pronto?",
+        17: "¿Qué lugar de Colombia te gustaría conocer mejor?",
+        19: "¿Qué tecnología te parece más útil hoy en día?",
+        21: "¿Qué recomendación le darías a alguien que empieza a programar?",
+        23: "Bueno parce, me tengo que ir. Un placer hablar con vos 😊",
     }[message_id]

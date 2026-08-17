@@ -13,6 +13,7 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from codex_bot.ai_provider import DeterministicAIProvider
 from codex_bot.fake_sheet import FakeSheetClient
+from codex_bot.constants import MESSAGE_LIMIT
 from codex_bot.main import ConversationRunner
 from codex_bot.responder import Responder
 from codex_bot.sheet_client import GoogleSheetsClient
@@ -41,7 +42,7 @@ def main() -> int:
                 "codex_bot",
                 logging.getLogger("sim"),
             )
-            while len(sheet.read_rows()) < 16:
+            while len(sheet.read_rows()) < MESSAGE_LIMIT:
                 simulator.run_once(sheet)
                 runner.run_once()
         print(f"Simulación local lista: {len(sheet.read_rows())} filas.")
@@ -53,7 +54,7 @@ def main() -> int:
         print("GOOGLE_SHEET_ID y GOOGLE_CREDENTIALS_PATH válidos son obligatorios.")
         return 2
     sheet = GoogleSheetsClient.from_service_account(credentials, sheet_id)
-    while len(sheet.read_rows()) < 16:
+    while len(sheet.read_rows()) < MESSAGE_LIMIT:
         simulator.run_once(sheet)
         time.sleep(arguments.interval)
     return 0

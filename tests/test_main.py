@@ -89,10 +89,10 @@ class ConversationRunnerTests(unittest.TestCase):
         self.assertEqual(sheet.appended_rows, [])
         self.assertEqual(len(responder.calls), 1)
 
-    def test_finaliza_sin_escribir_despues_de_16(self) -> None:
+    def test_finaliza_sin_escribir_despues_de_24(self) -> None:
         history = [
             row(index, "claude_bot" if index % 2 else "codex_bot")
-            for index in range(1, 17)
+            for index in range(1, 25)
         ]
         result, sheet, responder = self.run_with(history)
 
@@ -103,7 +103,7 @@ class ConversationRunnerTests(unittest.TestCase):
     def test_guarda_recuerdos_en_el_mismo_ciclo_de_la_fila_final(self) -> None:
         history = [
             row(index, "claude_bot" if index % 2 else "codex_bot")
-            for index in range(1, 16)
+            for index in range(1, 24)
         ]
         sheet = InMemorySheet(history)
         responder = RecordingResponder()
@@ -119,7 +119,7 @@ class ConversationRunnerTests(unittest.TestCase):
             result = runner.run_once()
 
         self.assertEqual(result, CycleResult.FINISHED)
-        self.assertEqual(sheet.appended_rows[0].id, 16)
+        self.assertEqual(sheet.appended_rows[0].id, 24)
         self.assertEqual(responder.remembered_rows, [sheet.rows])
 
     def test_polling_continua_despues_de_error_transitorio(self) -> None:

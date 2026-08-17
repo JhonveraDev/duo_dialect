@@ -12,7 +12,7 @@ from codex_bot.validator import validate_response
 
 
 class FakeIntegrationTests(unittest.TestCase):
-    def test_conversacion_completa_tiene_16_filas_validas(self) -> None:
+    def test_conversacion_completa_tiene_24_filas_validas(self) -> None:
         sheet = FakeSheetClient()
         simulator = ClaudeBotSimulator()
         with tempfile.TemporaryDirectory() as directory:
@@ -34,18 +34,18 @@ class FakeIntegrationTests(unittest.TestCase):
                 logging.getLogger("test-e2e"),
             )
 
-            while len(sheet.read_rows()) < 16:
+            while len(sheet.read_rows()) < 24:
                 simulator.run_once(sheet)
                 result = runner.run_once()
-                if len(sheet.read_rows()) < 16:
+                if len(sheet.read_rows()) < 24:
                     self.assertEqual(result, CycleResult.APPENDED)
 
         rows = sheet.read_rows()
-        self.assertEqual([row.id for row in rows], list(range(1, 17)))
-        self.assertEqual([row.bot for row in rows[::2]], ["claude_bot"] * 8)
-        self.assertEqual([row.bot for row in rows[1::2]], ["codex_bot"] * 8)
+        self.assertEqual([row.id for row in rows], list(range(1, 25)))
+        self.assertEqual([row.bot for row in rows[::2]], ["claude_bot"] * 12)
+        self.assertEqual([row.bot for row in rows[1::2]], ["codex_bot"] * 12)
         self.assertEqual(rows[-1].bot, "codex_bot")
-        self.assertIn("me tengo que ir", rows[14].mensaje)
+        self.assertIn("me tengo que ir", rows[22].mensaje)
         self.assertTrue(all(len(row.mensaje) <= 500 for row in rows))
         self.assertTrue(
             all(validate_response(row.mensaje, "dato").valid for row in rows)

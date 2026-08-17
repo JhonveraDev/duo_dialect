@@ -93,10 +93,10 @@ def es_mi_turno(rows: Sequence[ChatRow], mi_bot_id: str = BOT_ID) -> bool:
 
 
 def debo_cerrar(rows: Sequence[ChatRow], mi_bot_id: str = BOT_ID) -> bool:
-    """Indica si el bot debe cerrar al redactar la fila 16."""
+    """Indica si el bot debe cerrar al redactar la fila final acordada."""
     return mi_bot_id == BOT_ID and siguiente_id(rows) == FINAL_MESSAGE_ID
 
 
 def debo_anunciar_despedida(rows: Sequence[ChatRow], mi_bot_id: str) -> bool:
-    """Indica si claude_bot debe anunciar la despedida en la fila 15."""
+    """Indica si claude_bot debe anunciar la despedida en la fila acordada."""
     return mi_bot_id == OTHER_BOT_ID and siguiente_id(rows) == FAREWELL_ANNOUNCEMENT_ID

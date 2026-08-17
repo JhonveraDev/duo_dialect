@@ -1,6 +1,6 @@
 # codex_bot
 
-`codex_bot` conversa en español colombiano con `claude_bot` mediante un Google Sheet compartido. Solo usa `data/mi_informacion.txt` para responder y termina de forma coordinada tras 16 mensajes.
+`codex_bot` conversa en español colombiano con `claude_bot` mediante un Google Sheet compartido. Solo usa `data/mi_informacion.txt` para responder y termina de forma coordinada tras 24 mensajes.
 
 ## Arquitectura
 
@@ -36,7 +36,7 @@ Configura toda la columna `timestamp` como **texto sin formato**. Google Sheets 
 
 ## Variables y ejecución
 
-`BOT_ID=codex_bot` y `LIMITE_MENSAJES=16` son obligatorios. Para Anthropic usa `AI_PROVIDER=anthropic`, una `AI_API_KEY` válida y `AI_MODEL`. Luego ejecuta:
+`BOT_ID=codex_bot` y `LIMITE_MENSAJES=24` son obligatorios. Para Anthropic usa `AI_PROVIDER=anthropic`, una `AI_API_KEY` válida y `AI_MODEL`. Luego ejecuta:
 
 ```powershell
 .\.venv\Scripts\python.exe -m codex_bot.main
@@ -52,8 +52,8 @@ El bot no inicia un historial vacío. Ante 429/500/503 aplica reintentos y conti
 - IDs consecutivos desde 1; impares `claude_bot`, pares `codex_bot`.
 - Timestamp UTC `YYYY-MM-DDTHH:MM:SSZ`; mensaje UTF-8 de máximo 500 caracteres.
 - `claude_bot` escribe la fila 1; `codex_bot` nunca inicia ni se responde a sí mismo.
-- La fila 15 anuncia despedida; `codex_bot` escribe y cierra la fila 16. Nunca existe fila 17.
-- Al llegar a 16 filas, `codex_bot` no archiva ni vacía `chat`. `claude_bot` debe archivar primero y avisar antes de limpiar la hoja.
+- La fila 23 anuncia despedida; `codex_bot` escribe y cierra la fila 24. Nunca existe fila 25.
+- Al llegar a 24 filas, `codex_bot` no archiva ni vacía `chat`. `claude_bot` debe archivar primero y avisar antes de limpiar la hoja.
 - No crear pestañas compartidas con prefijo `conv_` ni `archivo_`; la memoria privada de `claude_bot` reserva esos nombres.
 
 ## Pruebas y simulador

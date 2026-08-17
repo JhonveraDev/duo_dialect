@@ -40,22 +40,22 @@ class ConversationTests(unittest.TestCase):
 
         self.assertEqual(siguiente_id(rows), 3)
 
-    def test_detecta_fin_al_llegar_a_16_filas(self) -> None:
+    def test_detecta_fin_al_llegar_a_24_filas(self) -> None:
         rows = [
             make_row(index, OTHER_BOT_ID if index % 2 else BOT_ID)
-            for index in range(1, 17)
+            for index in range(1, 25)
         ]
 
         self.assertTrue(conversacion_terminada(rows))
         self.assertFalse(es_mi_turno(rows, BOT_ID))
 
-    def test_fila_15_anuncia_despedida_y_fila_16_cierra(self) -> None:
-        fourteen_rows = self.make_valid_history(14)
-        fifteen_rows = self.make_valid_history(15)
+    def test_fila_23_anuncia_despedida_y_fila_24_cierra(self) -> None:
+        twenty_two_rows = self.make_valid_history(22)
+        twenty_three_rows = self.make_valid_history(23)
 
-        self.assertTrue(debo_anunciar_despedida(fourteen_rows, OTHER_BOT_ID))
-        self.assertFalse(debo_cerrar(fourteen_rows, BOT_ID))
-        self.assertTrue(debo_cerrar(fifteen_rows, BOT_ID))
+        self.assertTrue(debo_anunciar_despedida(twenty_two_rows, OTHER_BOT_ID))
+        self.assertFalse(debo_cerrar(twenty_two_rows, BOT_ID))
+        self.assertTrue(debo_cerrar(twenty_three_rows, BOT_ID))
 
     def test_valida_historial_vacio(self) -> None:
         validar_historial([])
@@ -87,10 +87,10 @@ class ConversationTests(unittest.TestCase):
         with self.assertRaisesRegex(InvalidHistoryError, "Alternancia inválida"):
             validar_historial(rows)
 
-    def test_rechaza_historico_mayor_a_16_filas(self) -> None:
-        rows = self.make_valid_history(16) + [make_row(17, OTHER_BOT_ID)]
+    def test_rechaza_historico_mayor_a_24_filas(self) -> None:
+        rows = self.make_valid_history(24) + [make_row(25, OTHER_BOT_ID)]
 
-        with self.assertRaisesRegex(InvalidHistoryError, "máximo es 16"):
+        with self.assertRaisesRegex(InvalidHistoryError, "máximo es 24"):
             validar_historial(rows)
 
     def test_rechaza_timestamp_con_formato_invalido(self) -> None:
