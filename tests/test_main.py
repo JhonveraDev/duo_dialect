@@ -31,9 +31,10 @@ class InMemorySheet:
 class RecordingResponder:
     def __init__(self) -> None:
         self.calls: list[tuple[str, bool]] = []
+        self.remembered_rows: list[list[ChatRow]] = []
 
     def remember_conversation(self, rows: list[ChatRow]) -> int:
-        del rows
+        self.remembered_rows.append(rows)
         return 0
     def generate(self, received_message: str, should_close: bool) -> str:
         self.calls.append((received_message, should_close))
@@ -98,6 +99,28 @@ class ConversationRunnerTests(unittest.TestCase):
         self.assertEqual(result, CycleResult.FINISHED)
         self.assertEqual(sheet.appended_rows, [])
         self.assertEqual(responder.calls, [])
+
+    def test_guarda_recuerdos_en_el_mismo_ciclo_de_la_fila_final(self) -> None:
+        history = [
+            row(index, "claude_bot" if index % 2 else "codex_bot")
+            for index in range(1, 16)
+        ]
+        sheet = InMemorySheet(history)
+        responder = RecordingResponder()
+        with tempfile.TemporaryDirectory() as directory:
+            runner = ConversationRunner(
+                sheet,
+                responder,  # type: ignore[arg-type]
+                Path(directory) / "state.json",
+                "codex_bot",
+                logging.getLogger("test-main"),
+            )
+
+            result = runner.run_once()
+
+        self.assertEqual(result, CycleResult.FINISHED)
+        self.assertEqual(sheet.appended_rows[0].id, 16)
+        self.assertEqual(responder.remembered_rows, [sheet.rows])
 
     def test_polling_continua_despues_de_error_transitorio(self) -> None:
         class TransientThenFinishedRunner:

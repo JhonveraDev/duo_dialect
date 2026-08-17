@@ -36,37 +36,6 @@ class MemoryClient(Protocol):
     def read_records(self) -> list[MemoryRecord]:
         """Lee todos los recuerdos conservando su trazabilidad."""
 
-    def archive_conversation(self, rows: Sequence[ChatRow]) -> str:
-        """Copia las 16 filas a una pestaña privada sin tocar chat."""
-        if len(rows) != 16:
-            raise MemoryContractError("Solo se puede archivar una conversación de 16 filas.")
-        metadata = run_with_backoff(
-            lambda: self._service.spreadsheets().get(
-                spreadsheetId=self._spreadsheet_id, fields="sheets.properties"
-            ).execute()
-        )
-        titles = [sheet["properties"]["title"] for sheet in metadata.get("sheets", [])]
-        numbers = [int(match.group(1)) for title in titles if (match := ARCHIVE_TITLE_PATTERN.match(title))]
-        title = f"conv_oficial_{max(numbers, default=0) + 1:03d}_{date.today().isoformat()}"
-        run_with_backoff(
-            lambda: self._service.spreadsheets().batchUpdate(
-                spreadsheetId=self._spreadsheet_id,
-                body={"requests": [{"addSheet": {"properties": {"title": title}}}]},
-            ).execute()
-        )
-        values = [list(ARCHIVE_HEADER)] + [
-            [row.id, row.bot, row.mensaje, row.timestamp] for row in rows
-        ]
-        run_with_backoff(
-            lambda: self._service.spreadsheets().values().append(
-                spreadsheetId=self._spreadsheet_id, range=f"'{title}'!A:D",
-                valueInputOption="RAW", insertDataOption="INSERT_ROWS",
-                body={"values": values},
-            ).execute()
-        )
-        return title
-    def archive_conversation(self, rows: Sequence[ChatRow]) -> str:
-        """Archiva una conversación cerrada en una pestaña privada."""
 
     def append_record(self, record: MemoryRecord) -> None:
         """Añade un recuerdo sin reescribir la hoja completa."""
@@ -256,9 +225,6 @@ class GoogleSheetsMemoryClient:
             ).execute()
         )
         return title
-    def archive_conversation(self, rows: Sequence[ChatRow]) -> str:
-        """Archiva una conversación cerrada en una pestaña privada."""
-
     def append_record(self, record: MemoryRecord) -> None:
         validate_memory_record(record)
         run_with_backoff(

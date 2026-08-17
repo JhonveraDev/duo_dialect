@@ -105,6 +105,12 @@ class ConversationRunner:
         self.state = LocalState(ultimo_id_procesado=received_row.id)
         save_state(self.state_path, self.state)
         self.logger.info("Append exitoso: id=%d.", new_row.id)
+        if conversacion_terminada([*rows, new_row]):
+            remembered = self.responder.remember_conversation([*rows, new_row])
+            self.logger.info(
+                "Conversación cerrada y persistida; recuerdos nuevos: %d.", remembered
+            )
+            return CycleResult.FINISHED
         return CycleResult.APPENDED
 
 
