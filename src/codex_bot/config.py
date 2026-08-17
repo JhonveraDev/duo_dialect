@@ -31,6 +31,7 @@ class Settings:
     state_file: Path
     knowledge_file: Path
     memory_sheet_id: str
+    web_lookup_enabled: bool
 
     @classmethod
     def from_environment(
@@ -66,6 +67,7 @@ class Settings:
                 values.get("KNOWLEDGE_FILE", "./data/mi_informacion.txt")
             ),
             memory_sheet_id=values.get("MEMORY_SHEET_ID", "").strip(),
+            web_lookup_enabled=_boolean(values, "WEB_LOOKUP_ENABLED", default=False),
         )
         settings.validate(require_credentials=require_credentials)
         return settings
@@ -110,3 +112,12 @@ def _positive_integer(values: Mapping[str, str], name: str) -> int:
     if value <= 0:
         raise ConfigError(f"{name} debe ser un entero positivo.")
     return value
+
+
+def _boolean(values: Mapping[str, str], name: str, *, default: bool) -> bool:
+    raw_value = values.get(name, str(default)).strip().casefold()
+    if raw_value in {"1", "true", "si", "sí", "yes"}:
+        return True
+    if raw_value in {"0", "false", "no"}:
+        return False
+    raise ConfigError(f"{name} debe ser true o false.")

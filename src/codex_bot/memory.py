@@ -24,6 +24,7 @@ MEMORY_HEADER = (
     "entorno",
 )
 MEMORY_TYPES = frozenset({"hecho", "preferencia", "relacion", "evento", "plan"})
+MEMORY_SUBJECTS = frozenset({"amigo", "conversacion"})
 MEMORY_STATES = frozenset(
     {"sin_confirmar", "confirmado", "descartado", "reemplazado"}
 )
@@ -37,6 +38,9 @@ class MemoryClient(Protocol):
         """Lee todos los recuerdos conservando su trazabilidad."""
 
 
+    def archive_conversation(self, rows: Sequence[ChatRow]) -> str:
+        """Archiva la conversación cerrada y devuelve su nombre de procedencia."""
+
     def append_record(self, record: MemoryRecord) -> None:
         """Añade un recuerdo sin reescribir la hoja completa."""
 
@@ -49,8 +53,8 @@ def validate_memory_record(record: MemoryRecord) -> None:
     """Valida los nueve campos antes de persistir un recuerdo."""
     if not record.id.startswith("r_") or len(record.id) < 6:
         raise MemoryContractError("El id del recuerdo debe empezar por 'r_'.")
-    if record.sujeto != "amigo":
-        raise MemoryContractError("La memoria automática solo admite sujeto 'amigo'.")
+    if record.sujeto not in MEMORY_SUBJECTS:
+        raise MemoryContractError("El sujeto del recuerdo no está permitido.")
     if not record.texto.strip():
         raise MemoryContractError("El texto del recuerdo no puede estar vacío.")
     if record.tipo not in MEMORY_TYPES:
@@ -81,9 +85,16 @@ def memory_context(records: Sequence[MemoryRecord]) -> str:
     active = active_records(records)
     if not active:
         return ""
-    plans = [record for record in active if record.tipo == "plan"]
-    others = [record for record in active if record.tipo != "plan"]
+    conversation = [record for record in active if record.sujeto == "conversacion"]
+    friend_records = [record for record in active if record.sujeto == "amigo"]
+    plans = [record for record in friend_records if record.tipo == "plan"]
+    others = [record for record in friend_records if record.tipo != "plan"]
     sections: list[str] = []
+    if conversation:
+        sections.append(
+            "INTERCAMBIOS ANTERIORES (úsalos solo para dar continuidad):\n"
+            + "\n".join(f"- {record.texto}" for record in conversation[-12:])
+        )
     if plans:
         sections.append(
             "TEMAS ABIERTOS DEL AMIGO (puedes retomarlos con naturalidad):\n"
@@ -125,6 +136,12 @@ class MemoryManager:
         known_origins = {record.origen for record in existing}
         known_texts = {_normalize(record.texto) for record in existing}
         stored = 0
+        for record in _conversation_records(rows, archive_name):
+            if record.origen in known_origins:
+                continue
+            self._client.append_record(record)
+            known_origins.add(record.origen)
+            stored += 1
         for proposal in self._extractor.extract_memories(rows, knowledge, existing):
             origin = f"{archive_name}#msg_{proposal.msg}"
             text = proposal.texto.strip()
@@ -144,6 +161,28 @@ class MemoryManager:
             stored += 1
         return stored
 
+def _conversation_records(rows: Sequence[ChatRow], archive_name: str) -> list[MemoryRecord]:
+    """Conserva pares verificables de pregunta-respuesta sin usar otro modelo."""
+    records: list[MemoryRecord] = []
+    for received, response in zip(rows, rows[1:]):
+        if received.bot != "claude_bot" or response.bot != "codex_bot":
+            continue
+        records.append(
+            MemoryRecord(
+                id=f"r_{uuid4().hex[:12]}",
+                sujeto="conversacion",
+                texto=(
+                    f"Pregunta previa: {received.mensaje} "
+                    f"Respuesta previa: {response.mensaje}"
+                ),
+                tipo="evento",
+                estado="confirmado",
+                fecha=date.today().isoformat(),
+                origen=f"{archive_name}#msg_{received.id}",
+                entorno="oficial",
+            )
+        )
+    return records
 
 def _normalize(text: str) -> str:
     return " ".join(text.casefold().strip().split())

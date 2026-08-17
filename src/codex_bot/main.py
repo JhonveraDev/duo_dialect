@@ -27,6 +27,7 @@ from codex_bot.sheet_client import (
     now_utc,
 )
 from codex_bot.state import load_state, save_state
+from codex_bot.web_lookup import create_web_lookup
 
 WAIT_LOG_INTERVAL_SECONDS = 300
 
@@ -130,7 +131,13 @@ def run(settings: Settings) -> int:
         MemoryManager(GoogleSheetsMemoryClient.from_service_account(str(settings.google_credentials_path), settings.memory_sheet_id), provider)
         if settings.memory_sheet_id else None
     )
-    responder = Responder(provider, settings.knowledge_file, logger, memory_manager=memory_manager)
+    responder = Responder(
+        provider,
+        settings.knowledge_file,
+        logger,
+        memory_manager=memory_manager,
+        web_lookup=create_web_lookup(settings.web_lookup_enabled),
+    )
     runner = ConversationRunner(
         client, responder, settings.state_file, settings.bot_id, logger
     )

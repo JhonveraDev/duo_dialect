@@ -17,6 +17,16 @@ class ConfigTests(unittest.TestCase):
         self.assertEqual(settings.bot_id, "codex_bot")
         self.assertEqual(settings.poll_interval_seconds, 30)
 
+    def test_activa_consulta_web_cuando_se_configura(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            knowledge = Path(directory) / "knowledge.txt"
+            knowledge.write_text("dato", encoding="utf-8")
+
+            settings = Settings.from_environment(
+                self.environment(knowledge) | {"WEB_LOOKUP_ENABLED": "true"}
+            )
+
+        self.assertTrue(settings.web_lookup_enabled)
     def test_rechaza_bot_id_distinto(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             knowledge = Path(directory) / "knowledge.txt"

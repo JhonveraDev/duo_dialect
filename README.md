@@ -42,6 +42,8 @@ Configura toda la columna `timestamp` como **texto sin formato**. Google Sheets 
 .\.venv\Scripts\python.exe -m codex_bot.main
 ```
 
+Para permitir consultas generales y noticias, configura `WEB_LOOKUP_ENABLED=true`. Esta opción usa fuentes públicas como contexto adicional, no reemplaza la información personal y puede fallar sin detener el bot.
+
 El bot no inicia un historial vacío. Ante 429/500/503 aplica reintentos y continúa en el siguiente ciclo; `Ctrl+C` termina limpiamente. Si una conversación ya archivada deja `chat` vacía, el bot reinicia su estado local de forma segura para poder atender la próxima conversación.
 
 ## Contrato con claude_bot
