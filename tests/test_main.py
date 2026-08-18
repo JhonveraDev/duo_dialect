@@ -31,14 +31,19 @@ class InMemorySheet:
 
 class RecordingResponder:
     def __init__(self) -> None:
-        self.calls: list[tuple[str, bool]] = []
+        self.calls: list[tuple[str, bool, bool]] = []
         self.remembered_rows: list[list[ChatRow]] = []
 
     def remember_conversation(self, rows: list[ChatRow]) -> int:
         self.remembered_rows.append(rows)
         return 0
-    def generate(self, received_message: str, should_close: bool) -> str:
-        self.calls.append((received_message, should_close))
+    def generate(
+        self,
+        received_message: str,
+        should_close: bool,
+        is_first_response: bool = False,
+    ) -> str:
+        self.calls.append((received_message, should_close, is_first_response))
         return "Todo bien, parce."
 
 
@@ -79,7 +84,7 @@ class ConversationRunnerTests(unittest.TestCase):
         self.assertEqual(result, CycleResult.APPENDED)
         self.assertEqual(sheet.appended_rows[0].id, 2)
         self.assertEqual(sheet.appended_rows[0].bot, "codex_bot")
-        self.assertEqual(responder.calls, [("Hola", False)])
+        self.assertEqual(responder.calls, [("Hola", False, True)])
 
     def test_descarta_respuesta_si_el_historial_cambia(self) -> None:
         initial = [row(1, "claude_bot")]

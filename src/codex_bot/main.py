@@ -87,7 +87,11 @@ class ConversationRunner:
 
         should_close = debo_cerrar(rows, self.bot_id)
         self.logger.info("Mensaje detectado: id=%d.", received_row.id)
-        response = self.responder.generate(received_row.mensaje, should_close)
+        response = self.responder.generate(
+            received_row.mensaje,
+            should_close,
+            is_first_response=received_row.id == 1,
+        )
         self.logger.info("Respuesta generada para id=%d.", received_row.id)
 
         refreshed_rows = self.sheet_client.read_rows()

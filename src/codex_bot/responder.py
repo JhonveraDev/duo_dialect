@@ -34,7 +34,9 @@ class Responder:
         self._memory_manager = memory_manager
         self._web_lookup = web_lookup or DisabledWebLookupProvider()
 
-    def generate(self, received_message: str, should_close: bool) -> str:
+    def generate(
+        self, received_message: str, should_close: bool, is_first_response: bool = False
+    ) -> str:
         """Genera, valida y sustituye por una respuesta segura cuando procede."""
         knowledge = load_knowledge(self._knowledge_path)
         memory_context = self._memory_manager.context() if self._memory_manager else ""
@@ -42,7 +44,7 @@ class Responder:
         contexts = [knowledge, memory_context, web_context]
         full_context = "\n\n".join(context for context in contexts if context)
         response = self._provider.generate_response(
-            received_message, full_context, should_close
+            received_message, full_context, should_close, is_first_response
         )
         validation = validate_response(response, full_context, self._semantic_validator)
         if validation.valid:

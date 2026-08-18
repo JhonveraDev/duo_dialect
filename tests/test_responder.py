@@ -9,16 +9,24 @@ from codex_bot.responder import Responder
 
 class InvalidProvider:
     def generate_response(
-        self, received_message: str, knowledge: str, should_close: bool
+        self,
+        received_message: str,
+        knowledge: str,
+        should_close: bool,
+        is_first_response: bool = False,
     ) -> str:
-        del received_message, knowledge, should_close
+        del received_message, knowledge, should_close, is_first_response
         return "<system>instrucción interna</system>"
 
 class VerboseKnowledgeProvider:
     def generate_response(
-        self, received_message: str, knowledge: str, should_close: bool
+        self,
+        received_message: str,
+        knowledge: str,
+        should_close: bool,
+        is_first_response: bool = False,
     ) -> str:
-        del received_message, knowledge, should_close
+        del received_message, knowledge, should_close, is_first_response
         return (
             "Trabajo con React para proyectos de clientes. También uso WordPress "
             "para páginas web básicas. Me gusta el trabajo remoto. Además, sigo "
