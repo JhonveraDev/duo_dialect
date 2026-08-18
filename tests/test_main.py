@@ -143,6 +143,26 @@ class ConversationRunnerTests(unittest.TestCase):
 
         self.assertEqual(code, 0)
         self.assertEqual(sleeps, [30])
+    def test_polling_continua_despues_de_error_no_fatal_del_proveedor(self) -> None:
+        class ErrorThenFinishedRunner:
+            calls = 0
+
+            def run_once(self) -> CycleResult:
+                self.calls += 1
+                if self.calls == 1:
+                    raise RuntimeError("fallo temporal de red")
+                return CycleResult.FINISHED
+
+        sleeps: list[float] = []
+        code = run_polling(
+            ErrorThenFinishedRunner(),
+            30,
+            logging.getLogger("test-main"),
+            sleep=sleeps.append,
+        )
+
+        self.assertEqual(code, 0)
+        self.assertEqual(sleeps, [30])
     def test_polling_continua_despues_de_error_transitorio(self) -> None:
         class TransientThenFinishedRunner:
             calls = 0

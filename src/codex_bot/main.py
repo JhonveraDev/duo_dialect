@@ -11,6 +11,7 @@ from codex_bot.ai_provider import TransientAIError, create_ai_provider
 from codex_bot.config import ConfigError, Settings
 from codex_bot.constants import MESSAGE_LIMIT
 from codex_bot.conversation import (
+    InvalidHistoryError,
     conversacion_terminada,
     debo_cerrar,
     es_mi_turno,
@@ -159,14 +160,21 @@ def run_polling(
         while True:
             try:
                 result = runner.run_once()
+            except InvalidHistoryError as error:
+                logger.error("Historial inválido; se detiene el bot: %s", error)
+                return 1
             except TransientAIError as error:
-                logger.warning("Gemini sigue temporalmente no disponible: %s", error)
+                logger.warning("El proveedor de IA sigue temporalmente no disponible: %s", error)
                 sleep(poll_interval_seconds)
                 continue
             except TransientGoogleSheetsError as error:
                 logger.warning(
                     "Google Sheets sigue temporalmente no disponible: %s", error
                 )
+                sleep(poll_interval_seconds)
+                continue
+            except Exception as error:
+                logger.exception("Error transitorio inesperado en el ciclo: %s", error)
                 sleep(poll_interval_seconds)
                 continue
             if result is CycleResult.FINISHED:

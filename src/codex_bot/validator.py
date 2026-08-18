@@ -50,6 +50,13 @@ def validate_response(
         return result
     return semantic_validator.validate(normalized, knowledge)
 
+def limit_response_sentences(response: str, maximum: int = 3) -> str:
+    """Conserva las primeras frases completas cuando solo sobra longitud verbal."""
+    if maximum < 1 or not isinstance(response, str):
+        return ""
+    normalized = response.strip()
+    sentences = re.findall(r"[^.!?]+(?:[.!?]+|$)", normalized)
+    return "".join(sentences[:maximum]).strip()
 
 def safe_response(should_close: bool) -> str:
     """Devuelve una alternativa natural que no afirma datos personales."""

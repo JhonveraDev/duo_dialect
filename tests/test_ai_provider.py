@@ -45,6 +45,16 @@ class AIBackoffTests(unittest.TestCase):
         self.assertEqual(run_with_ai_backoff(operation, sleep=sleeps.append), "ok")
         self.assertEqual(sleeps, [1, 2])
 
+    def test_reintenta_504_deadline_exceeded(self) -> None:
+        sleeps: list[float] = []
+
+        def operation() -> str:
+            raise RuntimeError("504 DEADLINE_EXCEEDED")
+
+        with self.assertRaises(TransientAIError):
+            run_with_ai_backoff(operation, sleep=sleeps.append)
+
+        self.assertEqual(sleeps, [1, 2, 4, 8])
     def test_reporta_error_transitorio_despues_de_cinco_intentos(self) -> None:
         with self.assertRaises(TransientAIError):
             run_with_ai_backoff(

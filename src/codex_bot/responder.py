@@ -4,11 +4,15 @@ import logging
 from pathlib import Path
 
 from codex_bot.ai_provider import AIProvider
-from codex_bot.knowledge import load_knowledge
+from codex_bot.knowledge import knowledge_backed_response, load_knowledge
 from codex_bot.memory import MemoryManager
 from codex_bot.models import ChatRow
 from codex_bot.web_lookup import DisabledWebLookupProvider, WebLookupProvider
-from codex_bot.validator import SemanticValidator, safe_response, validate_response
+from codex_bot.validator import (
+    SemanticValidator,
+    limit_response_sentences,
+    validate_response,
+)
 
 
 class Responder:
@@ -43,10 +47,21 @@ class Responder:
         validation = validate_response(response, full_context, self._semantic_validator)
         if validation.valid:
             return response.strip()
+        if "La respuesta supera tres frases." in validation.reasons:
+            shortened = limit_response_sentences(response)
+            shortened_validation = validate_response(
+                shortened, full_context, self._semantic_validator
+            )
+            if shortened_validation.valid:
+                self._logger.info(
+                    "Respuesta recortada a tres frases para conservar información válida."
+                )
+                return shortened
         self._logger.warning(
-            "Respuesta reemplazada por validación: %s", validation.reasons
+            "Respuesta reemplazada por alternativa basada en conocimiento: %s",
+            validation.reasons,
         )
-        return safe_response(should_close)
+        return knowledge_backed_response(received_message, knowledge, should_close)
     def remember_conversation(self, rows: list[ChatRow]) -> int:
         """Extrae recuerdos privados al cerrar, sin modificar chat."""
         if self._memory_manager is None:

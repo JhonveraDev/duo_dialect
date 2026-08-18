@@ -1,6 +1,11 @@
 import unittest
 
-from codex_bot.validator import ResponseValidation, safe_response, validate_response
+from codex_bot.validator import (
+    ResponseValidation,
+    limit_response_sentences,
+    safe_response,
+    validate_response,
+)
 
 
 class RejectingSemanticValidator:
@@ -27,6 +32,16 @@ class ValidatorTests(unittest.TestCase):
         self.assertFalse(result.valid)
         self.assertEqual(len(result.reasons), 2)
 
+    def test_recorta_a_tres_frases_completas(self) -> None:
+        response = "React es mi herramienta principal. También uso WordPress. Trabajo remoto. Me gusta el café."
+
+        shortened = limit_response_sentences(response)
+
+        self.assertEqual(
+            shortened,
+            "React es mi herramienta principal. También uso WordPress. Trabajo remoto.",
+        )
+        self.assertTrue(validate_response(shortened, "dato").valid)
     def test_permita_validador_semantico_opcional(self) -> None:
         result = validate_response("Todo bien.", "dato", RejectingSemanticValidator())
 

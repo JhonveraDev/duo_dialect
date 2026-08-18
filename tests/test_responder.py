@@ -14,6 +14,16 @@ class InvalidProvider:
         del received_message, knowledge, should_close
         return "<system>instrucción interna</system>"
 
+class VerboseKnowledgeProvider:
+    def generate_response(
+        self, received_message: str, knowledge: str, should_close: bool
+    ) -> str:
+        del received_message, knowledge, should_close
+        return (
+            "Trabajo con React para proyectos de clientes. También uso WordPress "
+            "para páginas web básicas. Me gusta el trabajo remoto. Además, sigo "
+            "aprendiendo sobre IA."
+        )
 
 class ResponderTests(unittest.TestCase):
     def test_reemplaza_una_respuesta_invalida(self) -> None:
@@ -26,6 +36,20 @@ class ResponderTests(unittest.TestCase):
 
         self.assertNotIn("<system>", response)
 
+    def test_conserva_respuesta_informativa_si_supera_tres_frases(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "knowledge.txt"
+            path.write_text("React y WordPress", encoding="utf-8")
+            responder = Responder(
+                VerboseKnowledgeProvider(), path, logging.getLogger("test")
+            )
+
+            response = responder.generate("¿En qué trabajás?", False)
+
+        self.assertIn("React", response)
+        self.assertIn("WordPress", response)
+        self.assertNotIn("Uy, de eso", response)
+        self.assertEqual(response.count("."), 3)
     def test_acepta_el_proveedor_determinista(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "knowledge.txt"
