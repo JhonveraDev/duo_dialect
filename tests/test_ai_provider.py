@@ -1,6 +1,11 @@
 import unittest
 
-from codex_bot.ai_provider import AnthropicAIProvider, DeterministicAIProvider
+from codex_bot.ai_provider import (
+    AnthropicAIProvider,
+    DeterministicAIProvider,
+    TransientAIError,
+    run_with_ai_backoff,
+)
 from codex_bot.validator import validate_response
 
 
@@ -20,6 +25,32 @@ class DeterministicAIProviderTests(unittest.TestCase):
         provider = DeterministicAIProvider()
 
         self.assertEqual(provider.extract_memories([], "dato", []), [])
+class TemporaryGeminiError(Exception):
+    def __str__(self) -> str:
+        return "503 UNAVAILABLE"
+
+
+class AIBackoffTests(unittest.TestCase):
+    def test_reintenta_503_y_luego_devuelve_la_respuesta(self) -> None:
+        attempts = 0
+        sleeps: list[float] = []
+
+        def operation() -> str:
+            nonlocal attempts
+            attempts += 1
+            if attempts < 3:
+                raise TemporaryGeminiError()
+            return "ok"
+
+        self.assertEqual(run_with_ai_backoff(operation, sleep=sleeps.append), "ok")
+        self.assertEqual(sleeps, [1, 2])
+
+    def test_reporta_error_transitorio_despues_de_cinco_intentos(self) -> None:
+        with self.assertRaises(TransientAIError):
+            run_with_ai_backoff(
+                lambda: (_ for _ in ()).throw(TemporaryGeminiError()),
+                sleep=lambda _: None,
+            )
 
 class FakeMessages:
     def __init__(self) -> None:
